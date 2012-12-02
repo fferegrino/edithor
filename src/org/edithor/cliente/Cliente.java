@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractListModel;
-import javax.swing.JList;
 
 /**
  *
@@ -25,7 +24,6 @@ public class Cliente {
     Socket sComunication2;
     String ipHost;
     ArrayList<String> usuarios;
-    JList lstActivos;
     String nombreCliente;
 
     public Cliente(VentanaCliente ventanaCliente, String username) {
@@ -39,16 +37,16 @@ public class Cliente {
      * @param ipHost
      * @param puerto
      */
-    public void conectar(String ipHost, int puerto, String username)
+    public void conectar(String ipHost, int puerto1, int puerto2)
             throws IOException {
-        sComunication1 = new Socket(ipHost, puerto);
-        sComunication2 = new Socket(ipHost, puerto);
+        sComunication1 = new Socket(ipHost, puerto1);
+        sComunication2 = new Socket(ipHost, puerto2);
         entrada = new DataInputStream(sComunication1.getInputStream());
         entrada2 = new DataInputStream(sComunication2.getInputStream());
         salida = new DataOutputStream(sComunication1.getOutputStream());
         salida.writeUTF(nombreCliente);
         HiloCliente hiloCliente = new HiloCliente(entrada, this);
-
+        usuarios = this.recuperaUsuarios();
         hiloCliente.start();
     }
 
@@ -179,7 +177,7 @@ public class Cliente {
     /**
      * Para reiniciar el editor
      *
-     * @param nuevoTexto El texto que queremos poner en la
+     * @param nuevoTexto El texto que queremos poner en la * *
      * ventana, <code>null</code> si no deseamos poner nada
      */
     public void reinicioEdicion(String nuevoTexto) {
@@ -274,7 +272,7 @@ public class Cliente {
     }
 
     public void ponerDatosActivo() {
-        lstActivos.setModel(new AbstractListModel() {
+        ventanaC.getLlistaUsuarios().setModel(new AbstractListModel() {
             @Override
             public int getSize() {
                 return usuarios.size();
@@ -318,5 +316,9 @@ public class Cliente {
         ventanaP.setAmigo(amigo);
         ventanaP.appendMessage(mensaje);
         ventanaP.setVisible(true);
+    }
+
+    public void setClientControl(boolean control) {
+        ventanaC.setControl(control);
     }
 }

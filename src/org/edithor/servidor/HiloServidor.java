@@ -15,7 +15,7 @@ public final class HiloServidor extends Thread {
     DataInputStream entrada = null;
     DataOutputStream salida = null;
     DataOutputStream salida2 = null;
-    public static ArrayList<HiloServidor> listaClientes;
+    public static ArrayList<HiloServidor> listaClientes = new ArrayList<>();
     String nameUser;
     PanelServidor serv;
 
@@ -24,7 +24,20 @@ public final class HiloServidor extends Thread {
         socketCliente2 = scliente2;
         this.serv = serv;
         nameUser = "";
-        listaClientes.add(this);
+        boolean add;
+        
+        try {
+            entrada = new DataInputStream(socketCliente1.getInputStream());
+            salida = new DataOutputStream(socketCliente1.getOutputStream());
+            salida2 = new DataOutputStream(socketCliente2.getOutputStream());
+            this.setNameUser(entrada.readUTF());
+            enviaUserActivos();
+            archivo();
+        } catch (IOException e) {
+            //e.printStackTrace();    
+        }
+        
+        add = listaClientes.add(this);
         serv.muestraEnLog("Cliente añadido: " + this.getNameUser() + " en " + this);
 
     }
@@ -41,16 +54,7 @@ public final class HiloServidor extends Thread {
     public void run() {
         serv.muestraEnLog("Servidor preparado.");
 
-        try {
-            entrada = new DataInputStream(socketCliente1.getInputStream());
-            salida = new DataOutputStream(socketCliente1.getOutputStream());
-            salida2 = new DataOutputStream(socketCliente2.getOutputStream());
-            this.setNameUser(entrada.readUTF());
-            enviaUserActivos();
-            archivo();
-        } catch (IOException e) {
-            //e.printStackTrace();    
-        }
+        
 
         int opcion = 0, numUsers = 0;
         String amigo = "", mencli = "";

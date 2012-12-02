@@ -36,6 +36,7 @@ public class HiloCliente extends Thread {
         while (conectado) {
             try {
                 opcion = entrada.readInt();
+                cliente.setClientControl(false);
                 switch (opcion) {
                     case 1:
                         // Mensaje grupal recibido
@@ -83,6 +84,7 @@ public class HiloCliente extends Thread {
                         cliente.reinicioEdicion(mensaje);
                         break;
                 }
+                cliente.setClientControl(true);
             } catch (IOException ex) {
             }
         }
