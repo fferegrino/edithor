@@ -1,6 +1,17 @@
 package org.edithor.cliente;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.Caret;
 
 /**
@@ -8,6 +19,10 @@ import javax.swing.text.Caret;
  * @author Antonio
  */
 public class VentanaCliente extends javax.swing.JFrame {
+
+    boolean recienAbierto;
+    boolean archivoModificado;
+    File archivoActual;
 
     /**
      * Creates new form VentanaCliente
@@ -26,6 +41,8 @@ public class VentanaCliente extends javax.swing.JFrame {
     private void initComponents() {
 
         jToolBar1 = new javax.swing.JToolBar();
+        panelInformacion = new javax.swing.JPanel();
+        labelEditando = new javax.swing.JLabel();
         jSplitPane1 = new javax.swing.JSplitPane();
         jScrollPane1 = new javax.swing.JScrollPane();
         txtAreaEditor = new javax.swing.JTextArea();
@@ -34,12 +51,36 @@ public class VentanaCliente extends javax.swing.JFrame {
         txtAreaChat = new javax.swing.JTextArea();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
+        menuNuevoArchivo = new javax.swing.JMenu();
+        menuAbrirArchivo = new javax.swing.JMenu();
+        menuGuardar = new javax.swing.JMenu();
         jMenu2 = new javax.swing.JMenu();
+        jMenu3 = new javax.swing.JMenu();
+        menuAcercaDe = new javax.swing.JMenu();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         jToolBar1.setFloatable(false);
         jToolBar1.setRollover(true);
+
+        labelEditando.setText("jLabel1");
+
+        javax.swing.GroupLayout panelInformacionLayout = new javax.swing.GroupLayout(panelInformacion);
+        panelInformacion.setLayout(panelInformacionLayout);
+        panelInformacionLayout.setHorizontalGroup(
+            panelInformacionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelInformacionLayout.createSequentialGroup()
+                .addComponent(labelEditando)
+                .addGap(0, 494, Short.MAX_VALUE))
+        );
+        panelInformacionLayout.setVerticalGroup(
+            panelInformacionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelInformacionLayout.createSequentialGroup()
+                .addComponent(labelEditando)
+                .addGap(0, 9, Short.MAX_VALUE))
+        );
+
+        jToolBar1.add(panelInformacion);
 
         txtAreaEditor.setColumns(20);
         txtAreaEditor.setRows(5);
@@ -57,11 +98,48 @@ public class VentanaCliente extends javax.swing.JFrame {
 
         jSplitPane1.setRightComponent(jSplitPane2);
 
-        jMenu1.setText("File");
+        jMenu1.setText("Archivo");
+
+        menuNuevoArchivo.setText("Nuevo");
+        menuNuevoArchivo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuNuevoArchivoActionPerformed(evt);
+            }
+        });
+        jMenu1.add(menuNuevoArchivo);
+
+        menuAbrirArchivo.setText("Abrir");
+        menuAbrirArchivo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuAbrirArchivoActionPerformed(evt);
+            }
+        });
+        jMenu1.add(menuAbrirArchivo);
+
+        menuGuardar.setText("Guardar");
+        menuGuardar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuGuardarActionPerformed(evt);
+            }
+        });
+        jMenu1.add(menuGuardar);
+
         jMenuBar1.add(jMenu1);
 
         jMenu2.setText("Edit");
         jMenuBar1.add(jMenu2);
+
+        jMenu3.setText("Ayuda");
+
+        menuAcercaDe.setText("Acerca de ediThor");
+        menuAcercaDe.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuAcercaDeActionPerformed(evt);
+            }
+        });
+        jMenu3.add(menuAcercaDe);
+
+        jMenuBar1.add(jMenu3);
 
         setJMenuBar(jMenuBar1);
 
@@ -70,7 +148,7 @@ public class VentanaCliente extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 530, Short.MAX_VALUE)
+            .addComponent(jSplitPane1)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -82,15 +160,219 @@ public class VentanaCliente extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void menuAcercaDeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuAcercaDeActionPerformed
+        AboutEdithor aboutBox = new AboutEdithor(this);
+        aboutBox.setVisible(true);
+    }//GEN-LAST:event_menuAcercaDeActionPerformed
+
+    private void menuAbrirArchivoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuAbrirArchivoActionPerformed
+        abrirArchivoSeguro();
+    }//GEN-LAST:event_menuAbrirArchivoActionPerformed
+
+    private void menuGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuGuardarActionPerformed
+        if (archivoActual == null) {
+            // Si está editando un archivo conocido
+            if (guardarArchivoComo()) {
+                archivoModificado = false;
+            }
+        } else {
+            if (guardarArchivo()) {
+                archivoModificado = false;
+            }
+        }
+    }//GEN-LAST:event_menuGuardarActionPerformed
+
+    private void menuNuevoArchivoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuNuevoArchivoActionPerformed
+    }//GEN-LAST:event_menuNuevoArchivoActionPerformed
+
+    /**
+     * Función para saber si el archivo ha sido editado o no
+     *
+     * @return
+     */
+    public boolean archivoEditado() {
+        return archivoModificado || !txtAreaEditor.getText().equals("");
+    }
+
+    /**
+     * Abre un archivo, verificando que se guarde el que está visualizando
+     * actualmente
+     *
+     * @return
+     */
+    private boolean abrirArchivoSeguro() {
+        boolean abierto;
+        if (archivoEditado()) {
+            int decision = JOptionPane.showConfirmDialog(txtAreaEditor, "¿Desea guardar el archivo?", "Aviso",
+                    JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+            switch (decision) {
+                case JOptionPane.YES_OPTION:
+                    // Si desea guardar el archivo
+                    if (archivoActual != null) {
+                        // Si el archivo es nuevo lo mandamos a la pantalla
+                        // de guardar como
+                        if (!guardarArchivoComo()) {
+                            // Si eligió no guardar el archivo lo regresamos
+                            return false;
+                        }
+                    } else {
+                        // Si ya se tiene historial del archivo
+                        if (!guardarArchivo()) {
+                            return false;
+                        }
+                    }
+                    txtAreaEditor.setText("");
+                    break;
+                case JOptionPane.NO_OPTION:
+                    // Si no desea guardar el archivo que está editando
+                    txtAreaEditor.setText("");
+                    break;
+                case JOptionPane.CANCEL_OPTION:
+                    return false;
+
+            }
+            abierto = abrirArchivo();
+        } else {
+            abierto = abrirArchivo();
+        }
+        return abierto;
+    }
+
+    /**
+     * Método para abrir un archivo
+     *
+     * @return
+     */
+    private boolean abrirArchivo() {
+        boolean abierto;
+        JFileChooser selectorDeArchivo = new JFileChooser();
+        FileNameExtensionFilter filtroDeArchivos = new FileNameExtensionFilter("Texto plano \".txt\" ", "txt");
+        selectorDeArchivo.setFileFilter(filtroDeArchivos);
+        int seleccion = selectorDeArchivo.showOpenDialog(txtAreaEditor);
+        if (seleccion == JFileChooser.APPROVE_OPTION) {
+            BufferedReader reader = null;
+            try {
+                archivoActual = selectorDeArchivo.getSelectedFile();
+                reader = new BufferedReader(new FileReader(archivoActual));
+                labelEditando.setText("Editando: " + archivoActual.getName());
+                String lineaArchivo = reader.readLine();
+                while (lineaArchivo != null) {
+                    txtAreaEditor.append(lineaArchivo);
+                    txtAreaEditor.append(System.getProperty("line.separator"));
+                    lineaArchivo = reader.readLine();
+                }
+            } catch (FileNotFoundException exception) {
+            } catch (IOException exception) {
+            } finally {
+                try {
+                    reader.close();
+                } catch (IOException ex) {
+                }
+            }
+            abierto = true;
+        } else {
+            abierto = false;
+        }
+        recienAbierto = true;
+        archivoModificado = false;
+        return abierto;
+    }
+
+    /**
+     * Guarda un archivo del que ya se tenga informacion
+     *
+     * @return
+     */
+    private boolean guardarArchivo() {
+        boolean guardado;
+        PrintWriter writer = null;
+        try {
+            writer = new PrintWriter(archivoActual);
+            writer.print(txtAreaEditor.getText());
+            guardado = true;
+        } catch (FileNotFoundException ex) {
+            guardado = false;
+        } finally {
+            writer.close();
+        }
+        return guardado;
+    }
+
+    /**
+     * Para guardar el archivo con un nombre especifico
+     *
+     * @return
+     */
+    private boolean guardarArchivoComo() {
+        boolean guardado;
+        JFileChooser selectorDeArchivo = new JFileChooser();
+        FileNameExtensionFilter filtroDeArchivos = new FileNameExtensionFilter("Texto plano \".txt\" ", "txt");
+        selectorDeArchivo.setFileFilter(filtroDeArchivos);
+        int seleccion = selectorDeArchivo.showSaveDialog(txtAreaEditor);
+        if (seleccion == JFileChooser.APPROVE_OPTION) {
+            archivoActual = selectorDeArchivo.getSelectedFile();
+            PrintWriter writer = null;
+            try {
+                writer = new PrintWriter(archivoActual);
+                writer.print(txtAreaEditor.getText());
+            } catch (FileNotFoundException exception) {
+            } finally {
+                writer.close();
+            }
+            labelEditando.setText("Editando: " + archivoActual.getName());
+            guardado = true;
+        } else {
+            guardado = false;
+        }
+
+        return guardado;
+    }
+
+    /**
+     * Método para crear un nuevo archivo
+     */
+    public void nuevoArchivo() {
+
+        if (archivoEditado()) {
+            int decision = JOptionPane.showConfirmDialog(txtAreaEditor, "¿Desea guardar el archivo que está editando?", "Aviso",
+                    JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+            switch (decision) {
+                case JOptionPane.YES_OPTION:
+                    if (archivoActual != null) {
+                        if (!guardarArchivoComo()) {
+                            return;
+                        }
+                    } else {
+                        if (!guardarArchivo()) {
+                            return;
+                        }
+                    }
+                    txtAreaEditor.setText("");
+                    labelEditando.setText("Nuevo archivo");
+                    break;
+            }
+        } else {
+            txtAreaEditor.setText("");
+            labelEditando.setText("Nuevo archivo");
+        }
+    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
+    private javax.swing.JMenu jMenu3;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JSplitPane jSplitPane2;
     private javax.swing.JToolBar jToolBar1;
+    private javax.swing.JLabel labelEditando;
+    private javax.swing.JMenu menuAbrirArchivo;
+    private javax.swing.JMenu menuAcercaDe;
+    private javax.swing.JMenu menuGuardar;
+    private javax.swing.JMenu menuNuevoArchivo;
+    private javax.swing.JPanel panelInformacion;
     private javax.swing.JTextArea txtAreaChat;
     private javax.swing.JTextArea txtAreaEditor;
     // End of variables declaration//GEN-END:variables
@@ -134,14 +416,15 @@ public class VentanaCliente extends javax.swing.JFrame {
     public void setDotAreaEditor(int dot) {
         txtAreaEditor.getCaret().setDot(dot);
     }
-    
-    public int getDotAreaEditor(){
+
+    public int getDotAreaEditor() {
         return txtAreaEditor.getCaret().getDot();
     }
 
     /**
      * Agrega un mensaje al area de chat
-     * @param mensaje 
+     *
+     * @param mensaje
      */
     public void agregaMensajeChat(String mensaje) {
         txtAreaChat.append(mensaje + "\n");
