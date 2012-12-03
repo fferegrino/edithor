@@ -25,19 +25,8 @@ public final class HiloServidor extends Thread {
         this.serv = serv;
         nameUser = "";
         boolean add;
-        
-        try {
-            entrada = new DataInputStream(socketCliente1.getInputStream());
-            salida = new DataOutputStream(socketCliente1.getOutputStream());
-            salida2 = new DataOutputStream(socketCliente2.getOutputStream());
-            this.setNameUser(entrada.readUTF());
-            enviaUserActivos();
-            archivo();
-        } catch (IOException e) {
-            //e.printStackTrace();    
-        }
-        
-        add = listaClientes.add(this);
+        listaClientes.add(this);
+
         serv.muestraEnLog("Cliente añadido: " + this.getNameUser() + " en " + this);
 
     }
@@ -54,7 +43,17 @@ public final class HiloServidor extends Thread {
     public void run() {
         serv.muestraEnLog("Servidor preparado.");
 
-        
+        try {
+            entrada = new DataInputStream(socketCliente1.getInputStream());
+            salida = new DataOutputStream(socketCliente1.getOutputStream());
+            salida2 = new DataOutputStream(socketCliente2.getOutputStream());
+            this.setNameUser(entrada.readUTF());
+            enviaUserActivos();
+            archivo();
+        } catch (IOException e) {
+            //e.printStackTrace();    
+        }
+
 
         int opcion = 0, numUsers = 0;
         String amigo = "", mencli = "";
@@ -65,7 +64,6 @@ public final class HiloServidor extends Thread {
                 switch (opcion) {
                     case 1://envio de mensage a todos
                         mencli = entrada.readUTF();
-                        //
                         enviaMsg(mencli);
                         break;
                     case 2://envio de lista de activos
@@ -119,14 +117,17 @@ public final class HiloServidor extends Thread {
                 user.salida2.writeInt(4);
                 user.salida2.writeUTF(us.getNameUser());
             } catch (IOException e) {
+
+                System.out.println("ERROR:" + e.getMessage());
             }
         }
     }
 
     public void escribeTexto(int pos, String texto) {
         HiloServidor user = null;
+        serv.editarServer(pos, texto);
         for (int i = 0; i < listaClientes.size(); i++) {
-            //serv.mostrar("MENSAJE DEVUELTO:" + texto);
+
             try {
                 user = listaClientes.get(i);
                 if (user == this) {
@@ -136,8 +137,8 @@ public final class HiloServidor extends Thread {
                 user.salida2.writeInt(5);//opcion de mensage 
                 user.salida2.writeInt(pos);
                 user.salida2.writeUTF(texto);
-                serv.editarServer(pos, texto);
             } catch (IOException e) {
+                System.out.println("ERROR:" + e.getMessage());
             }
         }
     }
@@ -148,13 +149,15 @@ public final class HiloServidor extends Thread {
             System.out.println("Archivo: " + serv.recuperaArchivoCompleto());
             this.salida2.writeUTF(serv.recuperaArchivoCompleto());
         } catch (IOException e) {
+
+            System.out.println("ERROR:" + e.getMessage());
         }
     }
 
     public void borrar(int pos, int lon) {
         HiloServidor user = null;
+                serv.borrarServer(pos, lon);
         for (int i = 0; i < listaClientes.size(); i++) {
-            //serv.mostrar("MENSAJE DEVUELTO:" + texto);
             try {
                 user = listaClientes.get(i);
                 if (user == this) {
@@ -164,16 +167,18 @@ public final class HiloServidor extends Thread {
                 user.salida2.writeInt(6);//opcion de mensage 
                 user.salida2.writeInt(pos);
                 user.salida2.writeInt(lon);
-                serv.borrarServer(pos, lon);
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (StringIndexOutOfBoundsException ex) {
+
+                System.out.println("ERROR:" + ex.getMessage());
             }
         }
     }
 
     public void borrarSupr(int pos, int lon) {
         HiloServidor user = null;
+                serv.borrarSuprServer(pos, lon);
         for (int i = 0; i < listaClientes.size(); i++) {
             //serv.mostrar("MENSAJE DEVUELTO:" + texto);
             try {
@@ -185,7 +190,6 @@ public final class HiloServidor extends Thread {
                 user.salida2.writeInt(7);//opcion de mensage 
                 user.salida2.writeInt(pos);
                 user.salida2.writeInt(lon);
-                serv.borrarSuprServer(pos, lon);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -201,7 +205,8 @@ public final class HiloServidor extends Thread {
                 user.salida2.writeInt(1);//opcion de mensage 
                 user.salida2.writeUTF("" + this.getNameUser() + " dice: " + mencli2);
             } catch (IOException e) {
-                e.printStackTrace();
+
+                System.out.println("ERROR:" + e.getMessage());
             }
         }
     }
@@ -217,7 +222,7 @@ public final class HiloServidor extends Thread {
                 user.salida2.writeInt(2);//opcion de agregar 
                 user.salida2.writeUTF(this.getNameUser());
             } catch (IOException e) {
-                e.printStackTrace();
+                System.out.println("ERROR:" + e.getMessage());
             }
         }
     }
@@ -233,7 +238,7 @@ public final class HiloServidor extends Thread {
                     user.salida2.writeUTF("" + this.getNameUser() + " dice: " + mencli);
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                System.out.println("ERROR:" + e.getMessage());
             }
         }
     }

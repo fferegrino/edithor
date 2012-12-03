@@ -17,9 +17,6 @@ public class HiloCliente extends Thread {
     Cliente cliente;
     boolean conectado;
     
-    public HiloCliente() {
-    }
-    
     public HiloCliente(DataInputStream entrada, Cliente cliente) {
         this.entrada = entrada;
         this.cliente = cliente;
@@ -33,7 +30,7 @@ public class HiloCliente extends Thread {
         String usuario;
         int opcion;
         int posicion;
-        while (conectado) {
+        while (true) {
             try {
                 opcion = entrada.readInt();
                 cliente.setClientControl(false);
@@ -86,6 +83,7 @@ public class HiloCliente extends Thread {
                 }
                 cliente.setClientControl(true);
             } catch (IOException ex) {
+                System.out.println(ex.getCause() + "\n" + ex.getMessage());
             }
         }
     }

@@ -45,7 +45,8 @@ public class Cliente {
         entrada2 = new DataInputStream(sComunication2.getInputStream());
         salida = new DataOutputStream(sComunication1.getOutputStream());
         salida.writeUTF(nombreCliente);
-        HiloCliente hiloCliente = new HiloCliente(entrada, this);
+//        HiloCliente hiloCliente = new HiloCliente(entrada, this);
+        HiloCliente hiloCliente = new HiloCliente(entrada2, this);
         usuarios = this.recuperaUsuarios();
         hiloCliente.start();
     }
@@ -155,7 +156,7 @@ public class Cliente {
      * @param textoEdit
      * @return
      */
-    public boolean agregarTexto(int posicion, String textoEdit) {
+     public boolean agregarTexto(int posicion, String textoEdit) {
         boolean editado = false;
         String texto = ventanaC.getTextoEditar();
         int pos = ventanaC.getDotAreaEditor();

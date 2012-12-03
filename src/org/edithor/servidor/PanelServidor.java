@@ -7,7 +7,7 @@ package org.edithor.servidor;
 import java.io.*;
 import java.net.*;
 
-class PanelServidor {
+public class PanelServidor {
 
     FrameServidor frameServer;
 
@@ -15,6 +15,12 @@ class PanelServidor {
         frameServer = new FrameServidor();
         frameServer.setVisible(true);
 
+    }
+    
+    
+    public static void main(String []args) throws IOException {
+        PanelServidor ser = new PanelServidor();
+        ser.runServer();
     }
 
     /**
@@ -28,7 +34,7 @@ class PanelServidor {
 
     public boolean editarServer(int posicion, String cambio) {
         String f = frameServer.getTextArchivo().getText();
-        muestraEnLog("Trato de escribir " + cambio + " entre 0;" + posicion +" y " + (posicion+cambio.length()) +"; el tamaño del texto es "+ f.length());
+       // muestraEnLog("Trato de escribir " + cambio + " entre 0;" + posicion +" y " + (posicion+cambio.length()) +"; el tamaño del texto es "+ f.length());
        if(f.length() >  posicion && posicion > 0) {
             return false;
         }
@@ -88,10 +94,6 @@ class PanelServidor {
         }
     }
 
-    public static void main(String abc[]) throws IOException {
-        PanelServidor ser = new PanelServidor();
-        ser.runServer();
-    }
 
     /**
      * Obtiene el archivo que se está editando en ese momento.

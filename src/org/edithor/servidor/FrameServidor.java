@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.edithor.servidor;
 
 import javax.swing.JTextArea;
@@ -80,7 +76,6 @@ public class FrameServidor extends java.awt.Frame {
     private void exitForm(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_exitForm
         System.exit(0);
     }//GEN-LAST:event_exitForm
-
 //    /**
 //     * @param args the command line arguments
 //     */
@@ -110,5 +105,4 @@ public class FrameServidor extends java.awt.Frame {
     public JTextArea getTextArchivo() {
         return textArchivo;
     }
-    
 }

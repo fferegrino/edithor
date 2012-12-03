@@ -29,11 +29,6 @@ public class VentanaCliente extends javax.swing.JFrame {
     Cliente cliente;
     private boolean control;
 
-    public static void main(String[] args) {
-        new VentanaCliente().setVisible(true);
-
-    }
-
     /**
      * Creates new form VentanaCliente
      */
@@ -48,6 +43,11 @@ public class VentanaCliente extends javax.swing.JFrame {
         setDocumentListeners();
         resizeEvent();
 
+    }
+    
+    
+    public static void main(String[] args) {
+        new VentanaCliente().setVisible(true);
     }
 
     private void setDocumentListeners() {
