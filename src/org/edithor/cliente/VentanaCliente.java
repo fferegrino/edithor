@@ -1,5 +1,5 @@
 package org.edithor.cliente;
-
+// Comentario
 import java.awt.Component;
 import java.awt.event.ComponentEvent;
 import java.io.BufferedReader;
