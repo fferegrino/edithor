@@ -8,6 +8,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.InetAddress;
 import javax.swing.JFileChooser;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
@@ -42,10 +43,10 @@ public class VentanaCliente extends javax.swing.JFrame {
         initComponents();
         setDocumentListeners();
         resizeEvent();
+        componentesConexion(false);
 
     }
-    
-    
+
     public static void main(String[] args) {
         new VentanaCliente().setVisible(true);
     }
@@ -100,7 +101,6 @@ public class VentanaCliente extends javax.swing.JFrame {
         jSplitPane2.setEnabled(false);
 
         jSplitPane3.setDividerLocation((jSplitPane3.getParent().getSize().width / 2));
-        jSplitPane3.setEnabled(false);
     }
 
     /**
@@ -122,6 +122,9 @@ public class VentanaCliente extends javax.swing.JFrame {
         jSplitPane2 = new javax.swing.JSplitPane();
         jSplitPane3 = new javax.swing.JSplitPane();
         jPanel2 = new javax.swing.JPanel();
+        jScrollPane4 = new javax.swing.JScrollPane();
+        txtAreaMensajeEnviar = new javax.swing.JTextArea();
+        buttonEnviar = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
         jScrollPane3 = new javax.swing.JScrollPane();
         listaUsuarios = new javax.swing.JList();
@@ -175,24 +178,35 @@ public class VentanaCliente extends javax.swing.JFrame {
 
         jSplitPane2.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
 
+        txtAreaMensajeEnviar.setColumns(20);
+        txtAreaMensajeEnviar.setRows(5);
+        jScrollPane4.setViewportView(txtAreaMensajeEnviar);
+
+        buttonEnviar.setText("Enviar");
+        buttonEnviar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonEnviarActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 100, Short.MAX_VALUE)
+            .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 176, Short.MAX_VALUE)
+            .addComponent(buttonEnviar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 301, Short.MAX_VALUE)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 242, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(buttonEnviar, javax.swing.GroupLayout.DEFAULT_SIZE, 53, Short.MAX_VALUE))
         );
 
         jSplitPane3.setLeftComponent(jPanel2);
 
-        listaUsuarios.setModel(new javax.swing.AbstractListModel() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public Object getElementAt(int i) { return strings[i]; }
-        });
+        listaUsuarios.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jScrollPane3.setViewportView(listaUsuarios);
 
         jLabel2.setFont(segoeUI);
@@ -205,7 +219,7 @@ public class VentanaCliente extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
                 .addGap(0, 0, 0)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 298, Short.MAX_VALUE)
+                    .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 365, Short.MAX_VALUE)
                     .addComponent(jLabel2)))
         );
         jPanel3Layout.setVerticalGroup(
@@ -233,7 +247,7 @@ public class VentanaCliente extends javax.swing.JFrame {
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 405, Short.MAX_VALUE)
+            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 548, Short.MAX_VALUE)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addComponent(jLabel1)
                 .addGap(0, 0, Short.MAX_VALUE))
@@ -354,17 +368,29 @@ public class VentanaCliente extends javax.swing.JFrame {
         acercaDe.setVisible(true);
     }//GEN-LAST:event_menuAcercaDeActionPerformed
 
+    private void buttonEnviarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonEnviarActionPerformed
+        String mensaje = txtAreaMensajeEnviar.getText();
+        if (!mensaje.isEmpty()) {
+            cliente.enviaMensaje(mensaje);
+            txtAreaMensajeEnviar.setText("");
+        }
+    }//GEN-LAST:event_buttonEnviarActionPerformed
+
     private boolean iniciarConexion() {
         try {
-            String username = "";
+            String username = System.getenv("COMPUTERNAME");
             do {
-                username = JOptionPane.showInputDialog(this,
-                        "¿Cual es tu nombre de usuario?",
-                        JOptionPane.QUESTION_MESSAGE);
+                username = JOptionPane.showInputDialog("¿Cual es tu nombre de usuario?", username);
+                if (username == null) {
+                    return false;
+                }
             } while (username.isEmpty());
             String host = "";
             do {
                 host = JOptionPane.showInputDialog("IP del servidor", "localhost");
+                if (host == null) {
+                    return false;
+                }
             } while (host.isEmpty());
             cliente = new Cliente(this, username);
             cliente.conectar(host, 8081, 8082);
@@ -394,6 +420,10 @@ public class VentanaCliente extends javax.swing.JFrame {
         for (Component v : jPanel3.getComponents()) {
             v.setEnabled(habilitados);
         }
+        txtAreaChat.setEnabled(habilitados);
+        listaUsuarios.setEnabled(habilitados);
+        txtAreaMensajeEnviar.setEnabled(habilitados);
+        txtAreaChat.setEditable(false);
     }
 
     /**
@@ -572,6 +602,7 @@ public class VentanaCliente extends javax.swing.JFrame {
         }
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton buttonEnviar;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JMenu jMenu1;
@@ -585,6 +616,7 @@ public class VentanaCliente extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JSplitPane jSplitPane2;
     private javax.swing.JSplitPane jSplitPane3;
@@ -600,6 +632,7 @@ public class VentanaCliente extends javax.swing.JFrame {
     private javax.swing.JPanel panelInformacion;
     private javax.swing.JTextArea txtAreaChat;
     private javax.swing.JTextArea txtAreaEditor;
+    private javax.swing.JTextArea txtAreaMensajeEnviar;
     // End of variables declaration//GEN-END:variables
 
     public JTextArea getTxtAreaEditor() {
