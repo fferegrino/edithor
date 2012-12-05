@@ -11,19 +11,12 @@ import java.util.logging.Logger;
  * @author Antonio Feregrino
  */
 public class HiloCliente extends Thread {
-    
+
     DataInputStream entrada;
     ArrayList<String> usuarios;
     Cliente cliente;
     boolean conectado;
-    
-    public HiloCliente(DataInputStream entrada, Cliente cliente) {
-        this.entrada = entrada;
-        this.cliente = cliente;
-        usuarios = new ArrayList<>();
-        conectado = true;
-    }
-    
+
     @Override
     public void run() {
         String mensaje;
@@ -83,8 +76,15 @@ public class HiloCliente extends Thread {
                 }
                 cliente.setClientControl(true);
             } catch (IOException ex) {
-                System.out.println(ex.getCause() + "\n" + ex.getMessage());
+                break;
             }
         }
+    }
+
+    public HiloCliente(DataInputStream entrada, Cliente cliente) {
+        this.entrada = entrada;
+        this.cliente = cliente;
+        usuarios = new ArrayList<>();
+        conectado = true;
     }
 }

@@ -12,15 +12,23 @@ public class PanelServidor {
     FrameServidor frameServer;
 
     public PanelServidor() {
+
         frameServer = new FrameServidor();
         frameServer.setVisible(true);
+        try {
+            InetAddress address = InetAddress.getLocalHost();
+            byte[] bIPAddress = address.getAddress();
+            String sIPAddress = "";
 
-    }
-    
-    
-    public static void main(String []args) throws IOException {
-        PanelServidor ser = new PanelServidor();
-        ser.runServer();
+            for (int x = 0; x < bIPAddress.length; x++) {
+                if (x > 0) {
+                    sIPAddress += ".";
+                }
+                sIPAddress += bIPAddress[x] & 255;
+            }
+            frameServer.setLabelIp(sIPAddress);
+        } catch (UnknownHostException ex) {
+        }
     }
 
     /**
@@ -34,8 +42,8 @@ public class PanelServidor {
 
     public boolean editarServer(int posicion, String cambio) {
         String f = frameServer.getTextArchivo().getText();
-       // muestraEnLog("Trato de escribir " + cambio + " entre 0;" + posicion +" y " + (posicion+cambio.length()) +"; el tamaño del texto es "+ f.length());
-       if(f.length() >  posicion && posicion > 0) {
+        // muestraEnLog("Trato de escribir " + cambio + " entre 0;" + posicion +" y " + (posicion+cambio.length()) +"; el tamaño del texto es "+ f.length());
+        if (f.length() > posicion && posicion > 0) {
             return false;
         }
 //       System.out.println("Editar: Trato de poner el caret en "+ pos +" L: " + f.length());
@@ -44,26 +52,24 @@ public class PanelServidor {
     }
 
     public boolean borrarServer(int posicion, int longitud) {
-        String f =  frameServer.getTextArchivo().getText();
-        if(f.length() >  posicion && posicion < longitud)
-        {
-           //System.out.println("Error en borrar bcsp\nTraté de borrar entre 0;"+(posicion-longitud)+" y "+posicion);
-           return false;
+        String f = frameServer.getTextArchivo().getText();
+        if (f.length() > posicion && posicion < longitud) {
+            //System.out.println("Error en borradoBackspace bcsp\nTraté de borradoBackspace entre 0;"+(posicion-longitud)+" y "+posicion);
+            return false;
         }
 //       System.out.println("Borrar: Trato de poner el caret en "+ pos +" L: " + f.length());
-         frameServer.getTextArchivo().setText(f.substring(0, posicion-longitud) + f.substring(posicion));
+        frameServer.getTextArchivo().setText(f.substring(0, posicion - longitud) + f.substring(posicion));
         return true;
     }
 
     public boolean borrarSuprServer(int posicion, int longitud) {
-        String f =  frameServer.getTextArchivo().getText();
-       if(f.length()-longitud > posicion && posicion < 0)
-       {
-           //System.out.println("Error en borrar supr\nTraté de borrar entre 0;"+posicion+" y "+(posicion+longitud));
-           return false;
-       }
-       System.out.println("Borrsupr: Trato de poner el caret en "+  posicion +" L: " + f.length());
-        frameServer.getTextArchivo().setText(f.substring(0, posicion) + f.substring(posicion+longitud));
+        String f = frameServer.getTextArchivo().getText();
+        if (f.length() - longitud > posicion && posicion < 0) {
+            //System.out.println("Error en borradoBackspace supr\nTraté de borradoBackspace entre 0;"+posicion+" y "+(posicion+longitud));
+            return false;
+        }
+        System.out.println("Borrsupr: Trato de poner el caret en " + posicion + " L: " + f.length());
+        frameServer.getTextArchivo().setText(f.substring(0, posicion) + f.substring(posicion + longitud));
         return true;
     }
 
@@ -94,13 +100,17 @@ public class PanelServidor {
         }
     }
 
-
     /**
-     * Obtiene el archivo que se está editando en ese momento.
+     * Obtiene el enviaArchivo que se está editando en ese momento.
      *
-     * @return El texto del archivo completo
+     * @return El texto del enviaArchivo completo
      */
     public String recuperaArchivoCompleto() {
-        return (frameServer.getTextArchivo().getText()==null)?"":frameServer.getTextArchivo().getText();
+        return (frameServer.getTextArchivo().getText() == null) ? "" : frameServer.getTextArchivo().getText();
+    }
+
+    public static void main(String[] args) throws IOException {
+        PanelServidor ser = new PanelServidor();
+        ser.runServer();
     }
 }

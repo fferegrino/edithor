@@ -122,13 +122,13 @@ public class VentanaPrivada extends javax.swing.JFrame {
         txtChat.append(mensaje + "\n");
     }
 
-   /**
-    * Establece a quien pertenece esa ventana de conversacion
-    * @param amigo 
-    */
+    /**
+     * Establece a quien pertenece esa ventana de conversacion
+     *
+     * @param amigo
+     */
     public void setAmigo(String amigo) {
         this.amigo = amigo;
         this.setTitle(String.format("Chat privado con {0}", amigo));
     }
-    
 }

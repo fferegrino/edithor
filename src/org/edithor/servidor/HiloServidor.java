@@ -5,6 +5,7 @@ import java.net.*;
 import java.util.*;
 
 /**
+ * Controlador del servidor
  *
  * @author Feregrino Bolaños Antonio
  */
@@ -31,6 +32,11 @@ public final class HiloServidor extends Thread {
 
     }
 
+    /**
+     * Obtiene el nombre del cliente al que le pertenece el hilo
+     *
+     * @return
+     */
     public String getNameUser() {
         return nameUser;
     }
@@ -49,7 +55,7 @@ public final class HiloServidor extends Thread {
             salida2 = new DataOutputStream(socketCliente2.getOutputStream());
             this.setNameUser(entrada.readUTF());
             enviaUserActivos();
-            archivo();
+            enviaArchivo();
         } catch (IOException e) {
             //e.printStackTrace();    
         }
@@ -64,7 +70,7 @@ public final class HiloServidor extends Thread {
                 switch (opcion) {
                     case 1://envio de mensage a todos
                         mencli = entrada.readUTF();
-                        enviaMsg(mencli);
+                        enviaMensaje(mencli);
                         break;
                     case 2://envio de lista de activos
                         numUsers = listaClientes.size();
@@ -76,7 +82,7 @@ public final class HiloServidor extends Thread {
                     case 3: // envia mensage a uno solo
                         amigo = entrada.readUTF();//captura nombre de amigo
                         mencli = entrada.readUTF();//mensage enviado
-                        enviaMsg(amigo, mencli);
+                        enviaMensaje(amigo, mencli);
                         break;
                     case 4:
                         int pos = entrada.readInt();
@@ -86,12 +92,12 @@ public final class HiloServidor extends Thread {
                     case 5:
                         int aux = entrada.readInt();
                         int lon1 = entrada.readInt();
-                        borrar(aux, lon1);
+                        borradoBackspace(aux, lon1);
                         break;
                     case 6:
                         int aux1 = entrada.readInt();
                         int lon2 = entrada.readInt();
-                        borrarSupr(aux1, lon2);
+                        borradoSuprimir(aux1, lon2);
                         break;
                 }
             } catch (IOException e) {
@@ -99,7 +105,7 @@ public final class HiloServidor extends Thread {
                 break;
             }
         }
-        actualiza(this);
+        actualizaUsuario(this);
         listaClientes.remove(this);
         try {
             socketCliente1.close();
@@ -109,13 +115,18 @@ public final class HiloServidor extends Thread {
         }
     }
 
-    public void actualiza(HiloServidor us) {
+    /**
+     * Cuando un cliente nuevo es añadido, envía el nombre a los demás
+     *
+     * @param usuarioNuevo
+     */
+    public void actualizaUsuario(HiloServidor usuarioNuevo) {
         HiloServidor user;
         for (int i = 0; i < listaClientes.size(); i++) {
             try {
                 user = listaClientes.get(i);
                 user.salida2.writeInt(4);
-                user.salida2.writeUTF(us.getNameUser());
+                user.salida2.writeUTF(usuarioNuevo.getNameUser());
             } catch (IOException e) {
 
                 System.out.println("ERROR:" + e.getMessage());
@@ -123,9 +134,15 @@ public final class HiloServidor extends Thread {
         }
     }
 
-    public void escribeTexto(int pos, String texto) {
+    /**
+     * Propaga el nuevo texto a los demás clientes
+     *
+     * @param posicion
+     * @param texto
+     */
+    public void escribeTexto(int posicion, String texto) {
         HiloServidor user = null;
-        serv.editarServer(pos, texto);
+        serv.editarServer(posicion, texto);
         for (int i = 0; i < listaClientes.size(); i++) {
 
             try {
@@ -135,7 +152,7 @@ public final class HiloServidor extends Thread {
                     continue;
                 }
                 user.salida2.writeInt(5);//opcion de mensage 
-                user.salida2.writeInt(pos);
+                user.salida2.writeInt(posicion);
                 user.salida2.writeUTF(texto);
             } catch (IOException e) {
                 System.out.println("ERROR:" + e.getMessage());
@@ -143,20 +160,27 @@ public final class HiloServidor extends Thread {
         }
     }
 
-    public void archivo() {
+    /**
+     * Cuando un cliente ingresa este método es el encargado de enviarle el
+     * archivo que se está editando
+     */
+    public void enviaArchivo() {
         try {
             this.salida2.writeInt(99);
-            System.out.println("Archivo: " + serv.recuperaArchivoCompleto());
             this.salida2.writeUTF(serv.recuperaArchivoCompleto());
         } catch (IOException e) {
-
-            System.out.println("ERROR:" + e.getMessage());
         }
     }
 
-    public void borrar(int pos, int lon) {
+    /**
+     * Método para propagar un borrado con backspace a los demás clientes
+     *
+     * @param posicionInicial
+     * @param longitud
+     */
+    public void borradoBackspace(int posicionInicial, int longitud) {
         HiloServidor user = null;
-                serv.borrarServer(pos, lon);
+        serv.borrarServer(posicionInicial, longitud);
         for (int i = 0; i < listaClientes.size(); i++) {
             try {
                 user = listaClientes.get(i);
@@ -165,8 +189,8 @@ public final class HiloServidor extends Thread {
                     continue;
                 }
                 user.salida2.writeInt(6);//opcion de mensage 
-                user.salida2.writeInt(pos);
-                user.salida2.writeInt(lon);
+                user.salida2.writeInt(posicionInicial);
+                user.salida2.writeInt(longitud);
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (StringIndexOutOfBoundsException ex) {
@@ -176,9 +200,15 @@ public final class HiloServidor extends Thread {
         }
     }
 
-    public void borrarSupr(int pos, int lon) {
+    /**
+     * Método para propagar un borrado con suprimir a los demás clientes
+     *
+     * @param posicionInicial
+     * @param longitud
+     */
+    public void borradoSuprimir(int posicionInicial, int longitud) {
         HiloServidor user = null;
-                serv.borrarSuprServer(pos, lon);
+        serv.borrarSuprServer(posicionInicial, longitud);
         for (int i = 0; i < listaClientes.size(); i++) {
             //serv.mostrar("MENSAJE DEVUELTO:" + texto);
             try {
@@ -188,22 +218,27 @@ public final class HiloServidor extends Thread {
                     continue;
                 }
                 user.salida2.writeInt(7);//opcion de mensage 
-                user.salida2.writeInt(pos);
-                user.salida2.writeInt(lon);
+                user.salida2.writeInt(posicionInicial);
+                user.salida2.writeInt(longitud);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    public void enviaMsg(String mencli2) {
+    /**
+     * Envía un mensaje al chat público
+     *
+     * @param mensaje
+     */
+    public void enviaMensaje(String mensaje) {
         HiloServidor user = null;
         for (int i = 0; i < listaClientes.size(); i++) {
             //
             try {
                 user = listaClientes.get(i);
                 user.salida2.writeInt(1);//opcion de mensage 
-                user.salida2.writeUTF("" + this.getNameUser() + " dice: " + mencli2);
+                user.salida2.writeUTF("" + this.getNameUser() + " dice: " + mensaje);
             } catch (IOException e) {
 
                 System.out.println("ERROR:" + e.getMessage());
@@ -227,7 +262,12 @@ public final class HiloServidor extends Thread {
         }
     }
 
-    private void enviaMsg(String amigo, String mencli) {
+    /**
+     * Envía mensaje de manera privada
+     * @param amigo
+     * @param mencli 
+     */
+    private void enviaMensaje(String amigo, String mencli) {
         HiloServidor user = null;
         for (int i = 0; i < listaClientes.size(); i++) {
             try {

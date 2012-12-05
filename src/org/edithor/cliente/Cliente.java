@@ -19,6 +19,7 @@ public class Cliente {
     DataInputStream entrada2;
     DataOutputStream salida;
     VentanaCliente ventanaC;
+    boolean conectado;
     VentanaPrivada ventanaP;
     Socket sComunication1;
     Socket sComunication2;
@@ -29,6 +30,7 @@ public class Cliente {
     public Cliente(VentanaCliente ventanaCliente, String username) {
         nombreCliente = username;
         this.ventanaC = ventanaCliente;
+        conectado = false;
     }
 
     /**
@@ -49,6 +51,7 @@ public class Cliente {
         HiloCliente hiloCliente = new HiloCliente(entrada2, this);
         usuarios = this.recuperaUsuarios();
         hiloCliente.start();
+        conectado = true;
     }
 
     /**
@@ -156,7 +159,7 @@ public class Cliente {
      * @param textoEdit
      * @return
      */
-     public boolean agregarTexto(int posicion, String textoEdit) {
+    public boolean agregarTexto(int posicion, String textoEdit) {
         boolean editado = false;
         String texto = ventanaC.getTextoEditar();
         int pos = ventanaC.getDotAreaEditor();
@@ -178,7 +181,7 @@ public class Cliente {
     /**
      * Para reiniciar el editor
      *
-     * @param nuevoTexto El texto que queremos poner en la * *
+     * @param nuevoTexto El texto que queremos poner en la 
      * ventana, <code>null</code> si no deseamos poner nada
      */
     public void reinicioEdicion(String nuevoTexto) {
@@ -272,6 +275,9 @@ public class Cliente {
         ponerDatosActivo();
     }
 
+    /**
+     * Rellena la lista de usuario
+     */
     public void ponerDatosActivo() {
         ventanaC.getLlistaUsuarios().setModel(new AbstractListModel() {
             @Override
@@ -319,7 +325,34 @@ public class Cliente {
         ventanaP.setVisible(true);
     }
 
+    /**
+     * Otorga el control al cliente
+     *
+     * @param control
+     */
     public void setClientControl(boolean control) {
         ventanaC.setControl(control);
+    }
+
+    /**
+     * Cierra la comunicación
+     *
+     * @throws IOException
+     */
+    public void cierraComunicacion()
+            throws IOException {
+        sComunication1.close();
+        sComunication2.close();
+
+        conectado = false;
+    }
+
+    /**
+     * Bandera para saber si el cliente está conectado o no
+     *
+     * @return
+     */
+    public boolean isConectado() {
+        return conectado;
     }
 }

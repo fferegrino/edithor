@@ -8,7 +8,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.InetAddress;
 import javax.swing.JFileChooser;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
@@ -18,6 +17,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
+ * La ventana del cliente
  *
  * @author Antonio
  */
@@ -30,11 +30,16 @@ public class VentanaCliente extends javax.swing.JFrame {
     Cliente cliente;
     private boolean control;
 
+    public static void main(String[] args) {
+        new VentanaCliente().setVisible(true);
+    }
+
     /**
      * Creates new form VentanaCliente
      */
     public VentanaCliente() {
         this.addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override
             public void componentResized(ComponentEvent e) {
                 resizeEvent();
             }
@@ -47,17 +52,13 @@ public class VentanaCliente extends javax.swing.JFrame {
 
     }
 
-    public static void main(String[] args) {
-        new VentanaCliente().setVisible(true);
-    }
-
     private void setDocumentListeners() {
         txtAreaEditor.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
                 if (control) {
                     try {
-                        if (cliente != null) {
+                        if (cliente != null && cliente.isConectado()) {
                             cliente.escritura(e.getLength());
                         }
                     } catch (NullPointerException ex) {
@@ -69,9 +70,8 @@ public class VentanaCliente extends javax.swing.JFrame {
             public void removeUpdate(DocumentEvent e) {
                 if (control) {
                     try {
-                        if (cliente != null) {
+                        if (cliente != null && cliente.isConectado()) {
                             if (txtAreaEditor.getCaretPosition() == e.getOffset()) {
-
                                 cliente.borradoSuprimir(e.getLength());
                             } else {
                                 cliente.borradoBackspace(e.getLength());
@@ -311,6 +311,11 @@ public class VentanaCliente extends javax.swing.JFrame {
 
         menuDesconectar.setText("Desconectar");
         menuDesconectar.setEnabled(false);
+        menuDesconectar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuDesconectarActionPerformed(evt);
+            }
+        });
         jMenu4.add(menuDesconectar);
 
         jMenuBar1.add(jMenu4);
@@ -376,6 +381,21 @@ public class VentanaCliente extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_buttonEnviarActionPerformed
 
+    private void menuDesconectarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuDesconectarActionPerformed
+
+        try {
+            cliente.cierraComunicacion();
+            componentesConexion(false);
+            limpiaPanelesConexion();
+        } catch (IOException ex) {
+        }
+    }//GEN-LAST:event_menuDesconectarActionPerformed
+
+    /**
+     * Inicia la conexión con el servidor
+     *
+     * @return
+     */
     private boolean iniciarConexion() {
         try {
             String username = System.getenv("COMPUTERNAME");
@@ -441,7 +461,7 @@ public class VentanaCliente extends javax.swing.JFrame {
      *
      * @return
      */
-    private boolean abrirArchivoSeguro() {
+    public boolean abrirArchivoSeguro() {
         boolean abierto;
         if (archivoEditado()) {
             int decision = JOptionPane.showConfirmDialog(txtAreaEditor, "¿Desea guardar el archivo?", "Aviso",
@@ -484,7 +504,7 @@ public class VentanaCliente extends javax.swing.JFrame {
      *
      * @return
      */
-    private boolean abrirArchivo() {
+    public boolean abrirArchivo() {
         boolean abierto;
         JFileChooser selectorDeArchivo = new JFileChooser();
         FileNameExtensionFilter filtroDeArchivos = new FileNameExtensionFilter("Texto plano \".txt\" ", "txt");
@@ -524,7 +544,7 @@ public class VentanaCliente extends javax.swing.JFrame {
      *
      * @return
      */
-    private boolean guardarArchivo() {
+    public boolean guardarArchivo() {
         boolean guardado;
         PrintWriter writer = null;
         if (archivoActual != null) {
@@ -548,7 +568,7 @@ public class VentanaCliente extends javax.swing.JFrame {
      *
      * @return
      */
-    private boolean guardarArchivoComo() {
+    public boolean guardarArchivoComo() {
         boolean guardado;
         JFileChooser selectorDeArchivo = new JFileChooser();
         FileNameExtensionFilter filtroDeArchivos = new FileNameExtensionFilter("Texto plano \".txt\" ", "txt");
@@ -571,6 +591,15 @@ public class VentanaCliente extends javax.swing.JFrame {
         }
 
         return guardado;
+    }
+
+    /**
+     * Método para limpiar los campos de texto, tanto del chat como la lista
+     */
+    public void limpiaPanelesConexion() {
+        txtAreaChat.setText("");
+        txtAreaMensajeEnviar.setText("");
+        listaUsuarios.removeAll();
     }
 
     /**
